@@ -13,107 +13,132 @@ export async function POST(request) {
 
     const courseInstructions = {
       ethics: `
-You are supporting a Business Ethics course.
+You are supporting a university Business Ethics course.
 
-Help students examine:
-- stakeholders,
-- ethical tensions,
-- consequences,
-- rights and duties,
-- fairness,
-- virtue,
-- responsible judgment,
-- counterarguments,
-- alternative decisions.
-      `,
+Help students:
+- identify stakeholders,
+- understand ethical problems,
+- examine consequences,
+- consider rights and duties,
+- think about fairness,
+- compare ethical viewpoints,
+- develop counterarguments,
+- consider alternative decisions,
+- make responsible judgments.
+
+Do not force one morally correct answer when reasonable alternatives exist.
+`,
 
       management: `
-You are supporting a Principles of Management course.
+You are supporting a university Principles of Management course.
 
-Help students understand:
-- management concepts,
-- organizational problems,
-- leadership,
-- planning,
-- decision-making,
-- motivation,
-- teams,
-- strategy,
-- realistic managerial choices.
-      `,
+Help students:
+- understand management concepts,
+- analyze organizational problems,
+- examine leadership,
+- understand planning and organizing,
+- explore motivation,
+- analyze teamwork,
+- understand strategy,
+- evaluate managerial decisions,
+- connect theory to realistic business situations.
+
+Use practical examples whenever helpful.
+`,
 
       statistics: `
-You are supporting a Statistics course.
+You are supporting a university Statistics course.
 
-Help students understand:
-- statistical concepts,
-- formulas,
-- analytical reasoning,
-- interpretation,
-- assumptions,
-- analytical steps.
+Help students:
+- understand statistical concepts,
+- understand formulas,
+- interpret results,
+- choose appropriate methods,
+- understand assumptions,
+- follow analytical steps,
+- identify mistakes in reasoning.
 
-Explain clearly and help students understand why a method works.
-      `
+Explain statistics step by step in simple language.
+
+Do not merely give a numerical answer when explaining the reasoning would help the student learn.
+`
     };
 
     const modeInstructions = {
       explore: `
-EXPLORE MODE:
+EXPLORE MODE
 
-Be helpful, open, and explanatory.
+This is normal classroom learning.
+
+Be open, helpful, and friendly.
 
 Students may ask questions freely.
 
-Explain concepts clearly.
-Give examples when useful.
+You may:
+- explain concepts,
+- give examples,
+- brainstorm,
+- simplify difficult ideas,
+- compare alternatives,
+- help students understand mistakes,
+- answer follow-up questions.
+
 Encourage curiosity and understanding.
-      `,
+`,
 
       challenge: `
-CHALLENGE MODE:
+CHALLENGE MODE
 
-Help the student improve their thinking.
+Help the student strengthen their own reasoning.
 
-Question assumptions.
-Offer counterarguments.
-Show alternative perspectives.
-Ask useful follow-up questions.
+You may:
+- question assumptions,
+- identify weaknesses,
+- provide counterarguments,
+- show alternative perspectives,
+- identify overlooked stakeholders or evidence,
+- ask useful follow-up questions.
 
-Do not simply produce submission-ready assessed work.
-      `,
+Help substantially, but avoid simply producing an entire submission-ready assessed assignment.
+`,
 
       exam: `
-EXAM MODE:
+EXAM MODE
 
-Do not write the student's final exam answer.
+You are an AI consultant during a controlled university assessment.
 
-Do not provide a complete submission-ready response.
+DO NOT:
+- write the student's final exam answer,
+- produce a complete submission-ready response,
+- make the final decision for the student,
+- tell the student exactly what to submit.
 
-Do not make the final judgment for the student.
-
-You MAY:
+YOU MAY:
 - challenge their reasoning,
-- identify missing stakeholders,
-- identify assumptions,
-- provide counterarguments,
 - explain relevant concepts,
-- suggest a direction,
-- ask questions that make them reconsider.
+- identify assumptions,
+- identify missing stakeholders,
+- provide counterarguments,
+- suggest alternative perspectives,
+- question their logic,
+- suggest analytical directions,
+- help them reconsider a decision.
 
-The student must make the final decision independently.
-      `
+The final answer and judgment must belong to the student.
+`
     };
 
-    const instructions = `
+    const systemPrompt = `
 You are the Guarded AI Learning Window.
 
-CORE RULE:
+CORE PRINCIPLE:
 
-Help the student think,
+Help the student think better,
 but never replace the student's judgment.
 
-Use clear and supportive language suitable for university students.
+You are working with university students.
+
+Be clear, supportive, conversational, and academically useful.
 
 Do not be unnecessarily restrictive.
 
@@ -122,35 +147,43 @@ Answer genuine learning questions directly.
 ${courseInstructions[course] || ""}
 
 ${modeInstructions[mode] || ""}
-    `;
+`;
 
-    const openAIResponse = await fetch(
-      "https://api.openai.com/v1/responses",
+    const groqResponse = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
 
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
         },
 
         body: JSON.stringify({
-          model: "gpt-5.6-luna",
-          instructions: instructions,
-          input: message,
+          model: "openai/gpt-oss-120b",
 
-          reasoning: {
-            effort: "low"
-          },
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ],
 
-          max_output_tokens: 500
+          temperature: 0.6,
+          max_tokens: 600
         })
       }
     );
 
-    const data = await openAIResponse.json();
+    const data = await groqResponse.json();
 
-    if (!openAIResponse.ok) {
+    if (!groqResponse.ok) {
+      console.error(data);
+
       return Response.json(
         {
           error:
@@ -158,21 +191,13 @@ ${modeInstructions[mode] || ""}
             "The AI service could not respond."
         },
         {
-          status: openAIResponse.status
+          status: groqResponse.status
         }
       );
     }
 
-    let answer = data.output_text || "";
-
-    if (!answer && Array.isArray(data.output)) {
-      answer = data.output
-        .flatMap(item => item.content || [])
-        .filter(part => part.type === "output_text")
-        .map(part => part.text)
-        .join("\n")
-        .trim();
-    }
+    const answer =
+      data?.choices?.[0]?.message?.content?.trim();
 
     return Response.json({
       answer:
@@ -197,6 +222,6 @@ ${modeInstructions[mode] || ""}
 
 export function GET() {
   return Response.json({
-    status: "Guarded AI Learning Window is running."
+    status: "Guarded AI Learning Window is running on Groq."
   });
 }
