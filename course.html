@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Choose Learning Mode</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 60px auto;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+
+    .course-name {
+      font-size: 20px;
+      color: #555;
+      margin-bottom: 35px;
+    }
+
+    .mode-button {
+      display: block;
+      width: 80%;
+      margin: 20px auto;
+      padding: 20px;
+      font-size: 20px;
+      border-radius: 14px;
+      background: #111;
+      color: white;
+      text-decoration: none;
+    }
+
+    .mode-button:hover {
+      background: #333;
+    }
+
+    .description {
+      font-size: 15px;
+      color: #666;
+      margin-top: -10px;
+      margin-bottom: 25px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      color: #444;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Choose Your Learning Mode</h1>
+
+    <div class="course-name" id="courseName">
+      Course
+    </div>
+
+    <a class="mode-button" id="exploreLink">
+      Explore Mode
+    </a>
+
+    <p class="description">
+      Learn, ask questions, explore ideas, and understand concepts.
+    </p>
+
+    <a class="mode-button" id="challengeLink">
+      Challenge Mode
+    </a>
+
+    <p class="description">
+      Test your reasoning, question assumptions, and improve your thinking.
+    </p>
+
+    <a class="mode-button" id="examLink">
+      Exam Mode
+    </a>
+
+    <p class="description">
+      Controlled AI support during approved assessment periods.
+    </p>
+
+    <a class="back-link" href="index.html">
+      ← Back to courses
+    </a>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const course = params.get("course");
+
+    const names = {
+      ethics: "Business Ethics",
+      management: "Principles of Management",
+      statistics: "Statistics"
+    };
+
+    document.getElementById("courseName").textContent =
+      names[course] || "Selected Course";
+
+    document.getElementById("exploreLink").href =
+      `ai.html?course=${course}&mode=explore`;
+
+    document.getElementById("challengeLink").href =
+      `ai.html?course=${course}&mode=challenge`;
+
+    document.getElementById("examLink").href =
+      `ai.html?course=${course}&mode=exam`;
+  </script>
+
+</body>
+</html>
