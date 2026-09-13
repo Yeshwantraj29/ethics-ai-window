@@ -58,11 +58,33 @@
 
     .chat-box {
       min-height: 280px;
+      max-height: 500px;
+      overflow-y: auto;
       border: 1px solid #ddd;
       border-radius: 14px;
       padding: 20px;
       background: #fafafa;
       margin-bottom: 20px;
+    }
+
+    .message {
+      padding: 14px 16px;
+      margin: 12px 0;
+      border-radius: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .student-message {
+      background: #111;
+      color: white;
+      margin-left: 15%;
+    }
+
+    .ai-message {
+      background: #ececec;
+      color: #111;
+      margin-right: 15%;
     }
 
     .welcome {
@@ -93,8 +115,9 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background: #333;
+    button:disabled {
+      background: #888;
+      cursor: not-allowed;
     }
 
     .note {
@@ -140,10 +163,12 @@
     <div class="chat-box" id="chatBox">
 
       <div class="welcome">
-        <strong>Welcome.</strong><br><br>
+        <strong>Hello 👋</strong><br><br>
 
-        This AI is here to help you think, explore, question, and learn.
-        You remain responsible for your final judgment and work.
+        I am here to help you think, explore, question, and learn.<br><br>
+
+        You can ask questions naturally. You remain responsible for your
+        final judgment and your own work.
       </div>
 
     </div>
@@ -187,13 +212,13 @@
 
     const modeNotes = {
       explore:
-        "Explore Mode: Ask questions freely, understand concepts, explore ideas, and learn with AI support.",
+        "Explore Mode: Ask freely. Learn concepts, explore ideas, request examples, and develop your understanding.",
 
       challenge:
-        "Challenge Mode: AI will help you test assumptions, examine alternatives, and strengthen your reasoning.",
+        "Challenge Mode: AI will question assumptions, offer alternative perspectives, and help strengthen your reasoning.",
 
       exam:
-        "Exam Mode: AI support is controlled. Use it to challenge your thinking. Your final answer must remain your own."
+        "Exam Mode: AI may support and challenge your thinking, but your final answer and judgment must remain your own."
     };
 
     document.getElementById("courseName").textContent =
@@ -204,6 +229,96 @@
 
     document.getElementById("modeNote").textContent =
       modeNotes[mode] || "";
+
+    const sendButton = document.getElementById("sendButton");
+    const messageBox = document.getElementById("message");
+    const studentIdBox = document.getElementById("studentId");
+    const chatBox = document.getElementById("chatBox");
+
+    function addMessage(text, type) {
+      const div = document.createElement("div");
+
+      div.className =
+        "message " +
+        (type === "student" ? "student-message" : "ai-message");
+
+      div.textContent = text;
+
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function askAI() {
+
+      const message = messageBox.value.trim();
+      const studentId = studentIdBox.value.trim();
+
+      if (!studentId) {
+        alert("Please enter your Student / Research ID first.");
+        return;
+      }
+
+      if (!message) {
+        alert("Please type a question first.");
+        return;
+      }
+
+      addMessage(message, "student");
+
+      messageBox.value = "";
+
+      sendButton.disabled = true;
+      sendButton.textContent = "AI is thinking...";
+
+      try {
+
+        const response = await fetch("/api/chat", {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            message: message,
+            studentId: studentId,
+            course: course,
+            mode: mode
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "AI could not respond.");
+        }
+
+        addMessage(data.answer, "ai");
+
+      } catch (error) {
+
+        addMessage(
+          "Sorry, something went wrong: " + error.message,
+          "ai"
+        );
+
+      } finally {
+
+        sendButton.disabled = false;
+        sendButton.textContent = "Ask AI";
+        messageBox.focus();
+      }
+    }
+
+    sendButton.addEventListener("click", askAI);
+
+    messageBox.addEventListener("keydown", function(event) {
+
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        askAI();
+      }
+
+    });
   </script>
 
 </body>
