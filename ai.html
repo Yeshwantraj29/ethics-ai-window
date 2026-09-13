@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Guarded AI Learning Window</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 35px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .session-info {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .id-box {
+      background: #f7f7f7;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+
+    .chat-box {
+      min-height: 280px;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 20px;
+      background: #fafafa;
+      margin-bottom: 20px;
+    }
+
+    .welcome {
+      color: #555;
+      line-height: 1.6;
+    }
+
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 100px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    .note {
+      margin-top: 25px;
+      padding: 15px;
+      background: #fff8d8;
+      border-radius: 12px;
+      line-height: 1.5;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 25px;
+      text-decoration: none;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Guarded AI Learning Window</h1>
+
+    <div class="session-info">
+      <strong id="courseName">Course</strong>
+      &nbsp;•&nbsp;
+      <span id="modeName">Mode</span>
+    </div>
+
+    <div class="id-box">
+      <label for="studentId">Student / Research ID</label>
+
+      <input
+        type="text"
+        id="studentId"
+        placeholder="Example: BE023"
+      >
+    </div>
+
+    <div class="chat-box" id="chatBox">
+
+      <div class="welcome">
+        <strong>Welcome.</strong><br><br>
+
+        This AI is here to help you think, explore, question, and learn.
+        You remain responsible for your final judgment and work.
+      </div>
+
+    </div>
+
+    <textarea
+      id="message"
+      placeholder="Ask your question here..."
+    ></textarea>
+
+    <button id="sendButton">
+      Ask AI
+    </button>
+
+    <div class="note" id="modeNote">
+      Loading your learning mode...
+    </div>
+
+    <a class="back" href="index.html">
+      ← Return to course selection
+    </a>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const course = params.get("course");
+    const mode = params.get("mode");
+
+    const courseNames = {
+      ethics: "Business Ethics",
+      management: "Principles of Management",
+      statistics: "Statistics"
+    };
+
+    const modeNames = {
+      explore: "Explore Mode",
+      challenge: "Challenge Mode",
+      exam: "Exam Mode"
+    };
+
+    const modeNotes = {
+      explore:
+        "Explore Mode: Ask questions freely, understand concepts, explore ideas, and learn with AI support.",
+
+      challenge:
+        "Challenge Mode: AI will help you test assumptions, examine alternatives, and strengthen your reasoning.",
+
+      exam:
+        "Exam Mode: AI support is controlled. Use it to challenge your thinking. Your final answer must remain your own."
+    };
+
+    document.getElementById("courseName").textContent =
+      courseNames[course] || "Selected Course";
+
+    document.getElementById("modeName").textContent =
+      modeNames[mode] || "Learning Mode";
+
+    document.getElementById("modeNote").textContent =
+      modeNotes[mode] || "";
+  </script>
+
+</body>
+</html>
